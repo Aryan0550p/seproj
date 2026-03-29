@@ -4,12 +4,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
 from app.core.database import get_session
+from app.core.config import settings
 from app.core.security import create_token, hash_password, verify_password
 from app.deps import get_current_user
 from app.models import Company, EmployeeManagerMap, Role, SessionToken, User
 from app.schemas import (
     CountryItem,
     LoginRequest,
+    LogoutRequest,
+    RefreshRequest,
     SignupRequest,
     TokenResponse,
     UserMeResponse,
@@ -17,6 +20,20 @@ from app.schemas import (
 from app.services.currency import get_country_currency
 
 router = APIRouter()
+
+
+def _issue_tokens_for_user(session: Session, user: User) -> TokenResponse:
+    access_token = create_token(str(user.id), "access", settings.access_token_exp_minutes)
+    refresh_token = create_token(str(user.id), "refresh", settings.refresh_token_exp_minutes)
+    session.add(SessionToken(user_id=user.id, refresh_token=refresh_token))
+    session.commit()
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        role=user.role.value,
+        user_id=user.id,
+        user_name=user.name,
+    )
 
 
 @router.post("/signup", response_model=TokenResponse)
@@ -42,17 +59,7 @@ async def signup(payload: SignupRequest, session: Session = Depends(get_session)
     session.commit()
     session.refresh(user)
 
-    access_token = create_token(str(user.id), "access", 30)
-    refresh_token = create_token(str(user.id), "refresh", 60 * 24 * 7)
-    session.add(SessionToken(user_id=user.id, refresh_token=refresh_token))
-    session.commit()
-    return TokenResponse(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        role=user.role.value,
-        user_id=user.id,
-        user_name=user.name,
-    )
+    return _issue_tokens_for_user(session, user)
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -61,17 +68,50 @@ def login(payload: LoginRequest, session: Session = Depends(get_session)) -> Tok
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    access_token = create_token(str(user.id), "access", 30)
-    refresh_token = create_token(str(user.id), "refresh", 60 * 24 * 7)
-    session.add(SessionToken(user_id=user.id, refresh_token=refresh_token))
+    return _issue_tokens_for_user(session, user)
+
+
+@router.post("/refresh", response_model=TokenResponse)
+def refresh_tokens(payload: RefreshRequest, session: Session = Depends(get_session)) -> TokenResponse:
+    from app.core.security import decode_token
+
+    try:
+        decoded = decode_token(payload.refresh_token)
+    except ValueError as exc:
+        raise HTTPException(status_code=401, detail="Invalid refresh token") from exc
+
+    if decoded.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Invalid token type")
+
+    user_id = decoded.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token subject")
+
+    token_row = session.exec(
+        select(SessionToken).where(SessionToken.refresh_token == payload.refresh_token)
+    ).first()
+    if not token_row:
+        raise HTTPException(status_code=401, detail="Refresh token revoked")
+
+    user = session.get(User, int(user_id))
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+
+    # Rotate refresh token by deleting old one and issuing a new pair.
+    session.delete(token_row)
     session.commit()
-    return TokenResponse(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        role=user.role.value,
-        user_id=user.id,
-        user_name=user.name,
-    )
+    return _issue_tokens_for_user(session, user)
+
+
+@router.post("/logout", status_code=204)
+def logout(payload: LogoutRequest, session: Session = Depends(get_session)) -> None:
+    token_row = session.exec(
+        select(SessionToken).where(SessionToken.refresh_token == payload.refresh_token)
+    ).first()
+    if token_row:
+        session.delete(token_row)
+        session.commit()
+    return None
 
 
 @router.get("/me", response_model=UserMeResponse)

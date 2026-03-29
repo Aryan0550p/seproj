@@ -10,10 +10,10 @@ function App() {
   return (
     <Routes>
       <Route path="/auth" element={<AuthPage />} />
-      <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-      <Route path="/admin/rules" element={<ProtectedRoute><AdminRulesPage /></ProtectedRoute>} />
-      <Route path="/employee" element={<ProtectedRoute><EmployeePage /></ProtectedRoute>} />
-      <Route path="/manager" element={<ProtectedRoute><ManagerPage /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminPage /></ProtectedRoute>} />
+      <Route path="/admin/rules" element={<ProtectedRoute allowedRoles={["admin"]}><AdminRulesPage /></ProtectedRoute>} />
+      <Route path="/employee" element={<ProtectedRoute allowedRoles={["employee"]}><EmployeePage /></ProtectedRoute>} />
+      <Route path="/manager" element={<ProtectedRoute allowedRoles={["manager", "admin"]}><ManagerPage /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/auth" replace />} />
     </Routes>
   );

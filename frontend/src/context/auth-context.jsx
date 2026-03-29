@@ -26,6 +26,10 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
+    const currentRefreshToken = localStorage.getItem("rms_refresh_token");
+    if (currentRefreshToken) {
+      api.logout(currentRefreshToken).catch(() => {});
+    }
     ["rms_access_token", "rms_refresh_token", "rms_role", "rms_user_name", "rms_user_id"].forEach(
       (k) => localStorage.removeItem(k)
     );

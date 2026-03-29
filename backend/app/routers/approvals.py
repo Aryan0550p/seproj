@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
 from app.core.database import get_session
-from app.deps import get_current_user
-from app.models import ApprovalLog, ApprovalStep, User
+from app.deps import get_current_user, require_role
+from app.models import ApprovalLog, ApprovalStep, EmployeeManagerMap, Expense, User
 from app.schemas import ApprovalDecisionRequest, ApprovalLogResponse, ExpenseResponse
 from app.services.workflow import apply_decision
 
@@ -35,6 +35,7 @@ def approve_expense(
     expense_id: int,
     payload: ApprovalDecisionRequest,
     session: Session = Depends(get_session),
+    _: User = Depends(require_role("manager", "admin")),
     current_user: User = Depends(get_current_user),
 ) -> ExpenseResponse:
     try:
@@ -50,6 +51,7 @@ def reject_expense(
     expense_id: int,
     payload: ApprovalDecisionRequest,
     session: Session = Depends(get_session),
+    _: User = Depends(require_role("manager", "admin")),
     current_user: User = Depends(get_current_user),
 ) -> ExpenseResponse:
     try:
@@ -64,8 +66,26 @@ def reject_expense(
 def approval_logs(
     expense_id: int,
     session: Session = Depends(get_session),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ) -> list[ApprovalLogResponse]:
+    expense = session.get(Expense, expense_id)
+    if not expense or expense.company_id != current_user.company_id:
+        raise HTTPException(status_code=404, detail="Expense not found")
+
+    can_view = (
+        current_user.role.value == "admin"
+        or expense.user_id == current_user.id
+        or session.exec(
+            select(EmployeeManagerMap).where(
+                EmployeeManagerMap.employee_id == expense.user_id,
+                EmployeeManagerMap.manager_id == current_user.id,
+            )
+        ).first()
+        is not None
+    )
+    if not can_view:
+        raise HTTPException(status_code=403, detail="Permission denied")
+
     logs = session.exec(select(ApprovalLog).where(ApprovalLog.expense_id == expense_id)).all()
     result = []
     for log in logs:
@@ -85,5 +105,27 @@ def approval_logs(
 
 
 @router.get("/{expense_id}/steps", response_model=list[ApprovalStep])
-def approval_steps(expense_id: int, session: Session = Depends(get_session), _: User = Depends(get_current_user)):
+def approval_steps(
+    expense_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    expense = session.get(Expense, expense_id)
+    if not expense or expense.company_id != current_user.company_id:
+        raise HTTPException(status_code=404, detail="Expense not found")
+
+    can_view = (
+        current_user.role.value == "admin"
+        or expense.user_id == current_user.id
+        or session.exec(
+            select(EmployeeManagerMap).where(
+                EmployeeManagerMap.employee_id == expense.user_id,
+                EmployeeManagerMap.manager_id == current_user.id,
+            )
+        ).first()
+        is not None
+    )
+    if not can_view:
+        raise HTTPException(status_code=403, detail="Permission denied")
+
     return session.exec(select(ApprovalStep).where(ApprovalStep.expense_id == expense_id)).all()

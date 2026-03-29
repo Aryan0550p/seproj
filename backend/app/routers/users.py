@@ -28,6 +28,7 @@ def _get_manager_info(session: Session, user_id: int) -> tuple[int | None, str |
 @router.get("", response_model=list[UserResponse])
 def list_users(
     session: Session = Depends(get_session),
+    _: User = Depends(require_role("admin", "manager")),
     current_user: User = Depends(get_current_user),
 ) -> list[UserResponse]:
     users = session.exec(select(User).where(User.company_id == current_user.company_id)).all()

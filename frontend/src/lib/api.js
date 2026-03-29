@@ -5,7 +5,32 @@ function withAuth(headers = {}) {
   return token ? { ...headers, Authorization: `Bearer ${token}` } : headers;
 }
 
-async function request(path, options = {}) {
+async function refreshAccessToken() {
+  const refreshToken = localStorage.getItem("rms_refresh_token");
+  if (!refreshToken) {
+    throw new Error("No refresh token");
+  }
+
+  const response = await fetch(`${API_BASE}/auth/refresh`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Session expired");
+  }
+
+  const data = await response.json();
+  localStorage.setItem("rms_access_token", data.access_token);
+  localStorage.setItem("rms_refresh_token", data.refresh_token);
+  if (data.role) localStorage.setItem("rms_role", data.role);
+  if (data.user_name) localStorage.setItem("rms_user_name", data.user_name);
+  if (data.user_id) localStorage.setItem("rms_user_id", String(data.user_id));
+  return data;
+}
+
+async function request(path, options = {}, retried = false) {
   const isFormData = options.body instanceof FormData;
   const headers = isFormData
     ? withAuth(options.headers)
@@ -15,6 +40,17 @@ async function request(path, options = {}) {
     ...options,
     headers,
   });
+
+  if (response.status === 401 && !retried && !path.startsWith("/auth/")) {
+    try {
+      await refreshAccessToken();
+      return request(path, options, true);
+    } catch {
+      ["rms_access_token", "rms_refresh_token", "rms_role", "rms_user_name", "rms_user_id"].forEach(
+        (k) => localStorage.removeItem(k)
+      );
+    }
+  }
 
   if (!response.ok) {
     let detail;
@@ -35,6 +71,8 @@ export const api = {
   // Auth
   signup: (payload) => request("/auth/signup", { method: "POST", body: JSON.stringify(payload) }),
   login: (payload) => request("/auth/login", { method: "POST", body: JSON.stringify(payload) }),
+  refresh: (refresh_token) => request("/auth/refresh", { method: "POST", body: JSON.stringify({ refresh_token }) }),
+  logout: (refresh_token) => request("/auth/logout", { method: "POST", body: JSON.stringify({ refresh_token }) }),
   getMe: () => request("/auth/me"),
   getCountries: () => request("/auth/countries"),
 

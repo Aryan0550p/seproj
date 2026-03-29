@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlmodel import Session, select
 
 from app.core.database import get_session
-from app.deps import get_current_user
+from app.deps import get_current_user, require_role
 from app.models import (
     ApprovalLog,
     Company,
@@ -50,6 +50,7 @@ def _expense_to_response(expense: Expense, user_name: str = "") -> ExpenseRespon
 async def create_expense(
     payload: ExpenseCreateRequest,
     session: Session = Depends(get_session),
+    _: User = Depends(require_role("employee")),
     current_user: User = Depends(get_current_user),
 ) -> ExpenseResponse:
     company = session.get(Company, current_user.company_id)
@@ -84,6 +85,7 @@ async def update_expense(
     expense_id: int,
     payload: ExpenseCreateRequest,
     session: Session = Depends(get_session),
+    _: User = Depends(require_role("employee")),
     current_user: User = Depends(get_current_user),
 ) -> ExpenseResponse:
     expense = session.get(Expense, expense_id)
@@ -115,6 +117,7 @@ async def update_expense(
 async def submit_expense(
     expense_id: int,
     session: Session = Depends(get_session),
+    _: User = Depends(require_role("employee")),
     current_user: User = Depends(get_current_user),
 ) -> ExpenseResponse:
     expense = session.get(Expense, expense_id)
@@ -148,6 +151,7 @@ async def submit_expense(
 async def upload_receipt(
     file: UploadFile = File(...),
     session: Session = Depends(get_session),
+    _: User = Depends(require_role("employee")),
     current_user: User = Depends(get_current_user),
 ) -> OCRResult:
     from app.services.file_storage import save_upload
@@ -177,6 +181,7 @@ async def upload_receipt(
 @router.get("/my", response_model=list[ExpenseResponse])
 def my_expenses(
     session: Session = Depends(get_session),
+    _: User = Depends(require_role("employee")),
     current_user: User = Depends(get_current_user),
 ) -> list[ExpenseResponse]:
     expenses = session.exec(select(Expense).where(Expense.user_id == current_user.id)).all()
@@ -186,6 +191,7 @@ def my_expenses(
 @router.get("/team", response_model=list[ExpenseResponse])
 def team_expenses(
     session: Session = Depends(get_session),
+    _: User = Depends(require_role("manager", "admin")),
     current_user: User = Depends(get_current_user),
 ) -> list[ExpenseResponse]:
     mapped = session.exec(
@@ -212,6 +218,19 @@ def get_expense_detail(
     expense = session.get(Expense, expense_id)
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
+    if expense.company_id != current_user.company_id:
+        raise HTTPException(status_code=403, detail="Permission denied")
+
+    is_owner = expense.user_id == current_user.id
+    is_admin = current_user.role.value == "admin"
+    is_manager_of_owner = session.exec(
+        select(EmployeeManagerMap).where(
+            EmployeeManagerMap.employee_id == expense.user_id,
+            EmployeeManagerMap.manager_id == current_user.id,
+        )
+    ).first() is not None
+    if not (is_owner or is_admin or is_manager_of_owner):
+        raise HTTPException(status_code=403, detail="Permission denied")
 
     user = session.get(User, expense.user_id)
     expense_resp = _expense_to_response(expense, user.name if user else "")

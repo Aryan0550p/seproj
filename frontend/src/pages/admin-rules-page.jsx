@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { useToast } from "../context/toast-context";
 import { Button } from "../components/ui/button";
@@ -11,7 +11,6 @@ import { AppShell } from "../components/layout/app-shell";
 import { Save } from "lucide-react";
 
 export function AdminRulesPage() {
-  const qc = useQueryClient();
   const toast = useToast();
   const [selectedUser, setSelectedUser] = useState("");
   const [flow, setFlow] = useState({
@@ -168,7 +167,7 @@ export function AdminRulesPage() {
               <div style={{ marginBottom: "1.5rem" }}>
                 <span className="label" style={{ marginBottom: "0.75rem" }}>Approvers</span>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                  {allApprovers.map((approver, idx) => {
+                  {allApprovers.map((approver) => {
                     const isSelected = flow.approverIds.includes(approver.id);
                     const isRequired = flow.requiredApproverIds.includes(approver.id);
                     return (
