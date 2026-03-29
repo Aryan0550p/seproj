@@ -35,6 +35,10 @@ export const api = {
   // Auth
   signup: (payload) => request("/auth/signup", { method: "POST", body: JSON.stringify(payload) }),
   login: (payload) => request("/auth/login", { method: "POST", body: JSON.stringify(payload) }),
+  logout: (refreshToken) =>
+    request("/auth/logout", { method: "POST", body: JSON.stringify({ refresh_token: refreshToken }) }),
+  refresh: (refreshToken) =>
+    request("/auth/refresh", { method: "POST", body: JSON.stringify({ refresh_token: refreshToken }) }),
   getMe: () => request("/auth/me"),
   getCountries: () => request("/auth/countries"),
 
