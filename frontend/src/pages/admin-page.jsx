@@ -8,7 +8,7 @@ import { Select } from "../components/ui/select";
 import { AppShell } from "../components/layout/app-shell";
 import { Badge } from "../components/ui/badge";
 import { Modal } from "../components/ui/modal";
-import { UserPlus, Key, Send } from "lucide-react";
+import { UserPlus, Key, RefreshCcw, DatabaseZap } from "lucide-react";
 
 export function AdminPage() {
   const qc = useQueryClient();
@@ -16,9 +16,9 @@ export function AdminPage() {
   const [showForm, setShowForm] = useState(false);
   const [newUser, setNewUser] = useState({ name: "", email: "", role: "employee", manager_id: "" });
   const [pwModal, setPwModal] = useState(null);
+  const [bootstrapSummary, setBootstrapSummary] = useState(null);
 
   const usersQuery = useQuery({ queryKey: ["users"], queryFn: api.users });
-  const auditQuery = useQuery({ queryKey: ["audit-stream"], queryFn: () => api.auditStream(40) });
 
   const userMutation = useMutation({
     mutationFn: api.createUser,
@@ -40,6 +40,29 @@ export function AdminPage() {
     onError: (err) => toast.error(err.message),
   });
 
+  const seedDemoMutation = useMutation({
+    mutationFn: api.loadSampleData,
+    onSuccess: (data) => {
+      qc.invalidateQueries();
+      const managerCount = data?.users?.manager ?? 0;
+      const employeeCount = data?.users?.employee ?? 0;
+      const totalExpenses = Object.values(data?.expenses || {}).reduce((sum, count) => sum + Number(count || 0), 0);
+      setBootstrapSummary(data);
+      toast.success(`Environment loaded: ${managerCount} managers, ${employeeCount} employees, ${totalExpenses} expenses`);
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const resetDemoMutation = useMutation({
+    mutationFn: api.resetCompanyData,
+    onSuccess: () => {
+      qc.invalidateQueries();
+      setBootstrapSummary(null);
+      toast.success("Environment reset to clean state");
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
   const managerOptions = useMemo(
     () => (usersQuery.data || []).filter((item) => item.role === "manager" || item.role === "admin"),
     [usersQuery.data]
@@ -57,11 +80,66 @@ export function AdminPage() {
             {users.length} user{users.length !== 1 ? "s" : ""} in your organization
           </p>
         </div>
-        <Button variant="primary" onClick={() => setShowForm(!showForm)}>
-          <UserPlus size={15} />
-          {showForm ? "Cancel" : "New User"}
-        </Button>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <Button
+            variant="success"
+            onClick={() => {
+              seedDemoMutation.mutate();
+            }}
+            disabled={seedDemoMutation.isPending || resetDemoMutation.isPending}
+            title="Load realistic sample company/users/expenses/workflows data"
+          >
+            <DatabaseZap size={14} />
+            {seedDemoMutation.isPending ? "Loading Environment..." : "Load Sample Data"}
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              const confirmed = window.confirm("Reset all users/expenses/workflows for this company (except your admin account)?");
+              if (confirmed) resetDemoMutation.mutate();
+            }}
+            disabled={seedDemoMutation.isPending || resetDemoMutation.isPending}
+            title="Reset to clean state"
+          >
+            <RefreshCcw size={14} />
+            {resetDemoMutation.isPending ? "Resetting..." : "Reset Environment"}
+          </Button>
+          <Button variant="primary" onClick={() => setShowForm(!showForm)}>
+            <UserPlus size={15} />
+            {showForm ? "Cancel" : "New User"}
+          </Button>
+        </div>
       </div>
+
+      {bootstrapSummary && (
+        <div className="card" style={{ padding: "1rem", marginBottom: "1.5rem", borderColor: "rgba(52, 211, 153, 0.35)" }}>
+          <h3 style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.75rem" }}>Environment Ready</h3>
+          <p style={{ color: "var(--text-secondary)", fontSize: "0.82rem", marginBottom: "0.75rem" }}>
+            Sample organization, users, workflows, and mixed-status expenses have been loaded for judging.
+          </p>
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <Badge status="approved">Managers: {bootstrapSummary?.users?.manager ?? 0}</Badge>
+            <Badge status="approved">Employees: {bootstrapSummary?.users?.employee ?? 0}</Badge>
+            <Badge status="pending">Pending: {bootstrapSummary?.expenses?.pending ?? 0}</Badge>
+            <Badge status="approved">Approved: {bootstrapSummary?.expenses?.approved ?? 0}</Badge>
+            <Badge status="rejected">Rejected: {bootstrapSummary?.expenses?.rejected ?? 0}</Badge>
+          </div>
+          {(bootstrapSummary?.credentials || []).length > 0 && (
+            <div style={{ marginTop: "0.9rem" }}>
+              <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", marginBottom: "0.4rem" }}>
+                Sample sign-in credentials:
+              </p>
+              <div style={{ background: "var(--bg-base)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "0.75rem" }}>
+                {(bootstrapSummary.credentials || []).map((item) => (
+                  <div key={item.email} style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "0.25rem" }}>
+                    <strong>{item.role}</strong>: {item.email} / {item.password}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Create User Form */}
       {showForm && (
@@ -136,51 +214,6 @@ export function AdminPage() {
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* Audit Stream */}
-      <div className="card" style={{ marginTop: "1.5rem", padding: "1.25rem", borderLeft: "4px solid var(--accent)" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.85rem" }}>
-          <h3 className="font-display" style={{ fontSize: "1.1rem", margin: 0 }}>Company Audit Stream</h3>
-          <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            Real-time activity
-          </span>
-        </div>
-        {auditQuery.isLoading ? (
-          <p style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>Loading audit events...</p>
-        ) : (auditQuery.data || []).length === 0 ? (
-          <p style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>No audit events yet.</p>
-        ) : (
-          <div style={{ display: "grid", gap: "0.55rem", maxHeight: "360px", overflow: "auto", paddingRight: "0.3rem" }}>
-            {(auditQuery.data || []).map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "160px 1fr auto",
-                  gap: "0.75rem",
-                  alignItems: "start",
-                  borderBottom: "1px dashed var(--border)",
-                  paddingBottom: "0.45rem",
-                }}
-              >
-                <Badge status={item.event_type === "override" ? "rejected" : "pending"}>{item.event_type}</Badge>
-                <div style={{ fontSize: "0.82rem" }}>
-                  <strong>{item.actor_name || "System"}</strong>
-                  {item.actor_role ? ` (${item.actor_role})` : ""}
-                  {`: ${item.message}`}
-                  {item.decision ? ` [${item.decision}]` : ""}
-                  <div style={{ color: "var(--text-muted)", marginTop: "0.15rem" }}>
-                    Expense #{item.expense_id}: {item.expense_description}
-                  </div>
-                </div>
-                <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
-                  {new Date(item.timestamp).toLocaleString()}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Password Modal */}
