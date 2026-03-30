@@ -1,0 +1,1204 @@
+:root {
+  /* DARK THEME (Default) */
+  --bg-app: linear-gradient(135deg, #111411 0%, #1b1f1b 50%, #141714 100%);
+  --bg-card: linear-gradient(145deg, rgba(25, 30, 25, 0.85), rgba(18, 22, 18, 0.95));
+  --bg-navbar: linear-gradient(145deg, rgba(20, 24, 20, 0.95), rgba(15, 18, 15, 0.95));
+  --bg-input: rgba(20, 24, 20, 0.5);
+  --bg-modal: linear-gradient(145deg, rgba(25, 30, 25, 0.95), rgba(18, 22, 18, 0.98));
+  --bg-secondary: rgba(255, 255, 255, 0.05);
+  --bg-tertiary: rgba(255, 255, 255, 0.08);
+  
+  --text-primary: #f5f5f5;
+  --text-secondary: #b5b5b5;
+  --text-dim: #888888;
+  
+  --border-accent: rgba(170, 140, 60, 0.2);
+  --border-input: rgba(170, 140, 60, 0.3);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  
+  --accent-gold: #b48c28;
+  --accent-gold-hover: #d4a937;
+  --accent-green: #6e9f3a;
+  
+  --status-pending-bg: rgba(255, 193, 7, 0.2);
+  --status-pending-text: #ffc107;
+  --status-shipped-bg: rgba(23, 162, 184, 0.2);
+  --status-shipped-text: #17a2b8;
+  --status-delivered-bg: rgba(40, 167, 69, 0.2);
+  --status-delivered-text: #28a745;
+  --status-rejected-bg: rgba(220, 53, 69, 0.2);
+  --status-rejected-text: #ff4d4d;
+  
+  --shadow-main: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+body.light {
+  /* LIGHT THEME */
+  --bg-app: #f5f5f5;
+  --bg-card: #ffffff;
+  --bg-navbar: #ffffff;
+  --bg-input: #f8f8f8;
+  --bg-modal: #ffffff;
+  --bg-secondary: #f0f0f0;
+  --bg-tertiary: #e0e0e0;
+  
+  --text-primary: #1a1a1a;
+  --text-secondary: #555555;
+  --text-dim: #777777;
+  
+  --border-accent: rgba(0, 0, 0, 0.1);
+  --border-input: rgba(0, 0, 0, 0.15);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  
+  --accent-gold: #b88a2a;
+  --accent-gold-hover: #d4a937;
+  --accent-green: #7a9f2f;
+  
+  --status-pending-bg: rgba(180, 140, 40, 0.15);
+  --status-pending-text: #6e5600;
+  --status-shipped-bg: rgba(0, 123, 255, 0.12);
+  --status-shipped-text: #003d82;
+  --status-delivered-bg: rgba(40, 167, 69, 0.12);
+  --status-delivered-text: #2d5a2d;
+  --status-rejected-bg: rgba(220, 53, 69, 0.12);
+  --status-rejected-text: #a02c2c;
+  
+  --shadow-main: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* light theme overrides */
+body.light {
+  background: #f5f5f5;
+  color: #1a1a1a;
+}
+
+body.light #app {
+  background: #f5f5f5;
+}
+
+body.light .navbar {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+body.light .nav-link {
+  color: #333;
+  background: linear-gradient(90deg, #1a1a1a, #b88a2a);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body.light .nav-link.router-link-active {
+  color: #000;
+  background: linear-gradient(90deg, #000000, #b88a2a);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body.light .theme-toggle {
+  color: #333;
+}
+
+body.light .theme-toggle:hover {
+  color: #000;
+}
+
+/* extensive light-mode overrides */
+body.light h1,
+body.light h2,
+body.light h3,
+body.light h4,
+body.light p,
+body.light span,
+body.light label {
+  color: #1a1a1a !important;
+}
+
+body.light .card {
+  background: #ffffff !important;
+  border: 1px solid rgba(0,0,0,0.08) !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1) !important;
+  box-shadow: 0 0 10px rgba(200,200,200,0.1) !important;
+  color: #1a1a1a !important;
+}
+
+/* ensure page containers adopt dark text */
+body.light .payments,
+body.light .orders,
+body.light .reports,
+body.light .inventory,
+body.light .delivery,
+body.light .dashboard {
+  color: #1a1a1a !important;
+}
+
+body.light .navbar {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+body.light table {
+  color: #1a1a1a;
+}
+
+body.light th,
+body.light td {
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+/* make header text much darker and give slightly stronger background */
+body.light th {
+  background: #eaeaea !important;
+  color: #333 !important;
+  font-weight: 600;
+}
+
+/* ensure td text also dark enough */
+body.light td {
+  color: #333 !important;
+}
+body.light .filter-input,
+body.light .report-type,
+body.light .date-start,
+body.light .date-end,
+body.light .search-input,
+body.light .filter-select {
+  background: #f0f0f0;
+  color: #1a1a1a;
+  border: 1px solid rgba(0,0,0,0.2);
+}
+
+body.light .filter-input option,
+body.light .report-type option,
+body.light .filter-select option {
+  background: #ffffff;
+  color: #1a1a1a;
+}
+
+body.light .btn-primary {
+  /* keep accent gradient */
+  color: #fff;
+}
+
+body.light .btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+  border: 1.5px solid rgba(0,0,0,0.2);
+}
+
+/* navbar brand dark text in light mode */
+body.light .navbar-brand h1 {
+  background: linear-gradient(90deg, #1a1a1a, #b8860b, #1a1a1a) !important;
+  background-size: 200% auto !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  animation: shimmer 5s linear infinite !important;
+}
+
+/* link hover visibility */
+body.light .nav-link:hover {
+  background: linear-gradient(90deg, #1a1a1a, #d4a937);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* dashboard metric text darker gradient for light background */
+body.light .dashboard .metric {
+  background: linear-gradient(90deg, #2c2c2c, #666666) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* recent activity card light adjustments */
+body.light .recent-activity {
+  background: #f0f0f0 !important;
+  color: #1a1a1a !important;
+}
+
+body.light .recent-activity li {
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  color: #333 !important;
+}
+body.light .recent-activity li:hover {
+  color: #000 !important;
+  padding-left: 8px;
+}
+
+/* ensure dashboard page heading is dark */
+body.light .dashboard h1 {
+  color: #1a1a1a !important;
+}
+
+/* ensure dark text on card-type containers */
+body.light .payments,
+body.light .orders,
+body.light .reports,
+body.light .inventory,
+body.light .delivery,
+body.light .dashboard {
+  color: #1a1a1a;
+}
+
+/* light status badge colors */
+body.light .pending {
+  background: rgba(180, 140, 40, 0.25);
+  color: #6e5600;
+  border: 1px solid rgba(180, 140, 40, 0.6) !important;
+}
+body.light .completed {
+  background: rgba(122, 159, 47, 0.25);
+  color: #3e581f;
+  border: 1px solid rgba(122, 159, 47, 0.6) !important;
+}
+body.light .overdue,
+body.light .delayed {
+  background: rgba(180, 100, 60, 0.25);
+  color: #7a3c1c;
+  border: 1px solid rgba(180, 100, 60, 0.6) !important;
+}
+
+/* button-sm adjustments so actions are visible */
+body.light .btn-sm {
+  background: rgba(220,220,220,0.8) !important;
+  color: #111 !important;
+}
+
+/* logout button visibility in light mode */
+body.light .logout {
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #111 !important;
+}
+
+body.light .logout:hover {
+  background: rgba(0, 0, 0, 0.14);
+}
+
+/* ================================
+   SALES DASHBOARD LIGHT MODE
+================================ */
+
+body.light .sales-dashboard {
+  color: #1a1a1a;
+}
+
+body.light .kpi-card {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+body.light .kpi-card h3 {
+  color: #666;
+}
+
+body.light .kpi-value {
+  background: linear-gradient(90deg, #2c2c2c, #555555);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body.light .trend.positive {
+  color: #2d8a4f;
+}
+
+body.light .trend.negative {
+  color: #d32f2f;
+}
+
+body.light .progress-bar {
+  background: linear-gradient(90deg, #b88a2a, #7a9f2f);
+}
+
+body.light .progress-container {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+body.light .progress-text {
+  color: #1a1a1a;
+}
+
+body.light .panel-section {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+body.light .panel-section h2,
+body.light .panel-section h3,
+body.light .panel-section h4 {
+  color: #1a1a1a;
+}
+
+body.light .order-table th {
+  background: #f0f0f0;
+  color: #333;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.light .order-table td {
+  color: #333;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.light .status {
+  color: #111;
+}
+
+body.light .status.pending {
+  background: rgba(180, 140, 40, 0.15);
+  color: #6e5600;
+}
+
+body.light .status.shipped {
+  background: rgba(40, 167, 69, 0.15);
+  color: #2d5a2d;
+}
+
+body.light .status.delivered {
+  background: rgba(0, 123, 255, 0.15);
+  color: #003d82;
+}
+
+body.light .btn-sm.edit {
+  background: rgba(0, 123, 255, 0.15);
+  color: #0066cc;
+  border: 1px solid rgba(0, 123, 255, 0.3);
+}
+
+body.light .btn-sm.edit:hover {
+  background: rgba(0, 123, 255, 0.25);
+}
+
+body.light .btn-sm.ship {
+  background: rgba(40, 167, 69, 0.15);
+  color: #2d8a4f;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+body.light .btn-sm.ship:hover {
+  background: rgba(40, 167, 69, 0.25);
+}
+
+body.light .quick-btn.primary {
+  background: linear-gradient(90deg, #b88a2a, #7a9f2f);
+  color: #fff;
+}
+
+body.light .quick-btn.primary:hover {
+  box-shadow: 0 4px 12px rgba(180, 140, 40, 0.2);
+}
+
+body.light .quick-btn.secondary {
+  background: rgba(0, 0, 0, 0.08);
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+body.light .quick-btn.secondary:hover {
+  background: rgba(0, 0, 0, 0.12);
+  color: #000;
+}
+
+body.light .search-input {
+  background: #f0f0f0;
+  color: #1a1a1a;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+body.light .search-input::placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+body.light .search-input:focus {
+  border-color: #b88a2a;
+  box-shadow: 0 0 8px rgba(180, 140, 40, 0.2);
+}
+
+body.light .task-item {
+  background: rgba(0, 0, 0, 0.05);
+  border-left-color: #b88a2a;
+}
+
+body.light .task-item.overdue {
+  background: rgba(255, 107, 107, 0.1);
+  border-left-color: #d32f2f;
+}
+
+body.light .task-type {
+  color: #b88a2a;
+}
+
+body.light .task-due {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+body.light .task-desc {
+  color: #333;
+}
+
+body.light .btn-xs {
+  background: rgba(40, 167, 69, 0.15);
+  color: #2d8a4f;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+body.light .btn-xs:hover {
+  background: rgba(40, 167, 69, 0.25);
+  color: #2d8a4f;
+}
+
+body.light .btn-xs.secondary {
+  background: rgba(0, 0, 0, 0.08);
+  color: #666;
+}
+
+body.light .btn-xs.secondary:hover {
+  background: rgba(0, 0, 0, 0.12);
+  color: #333;
+}
+
+body.light .chart-card {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.light .chart-card h4 {
+  color: #1a1a1a;
+}
+
+body.light .legend-item {
+  color: #333;
+}
+
+body.light .ratio-labels {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+body.light .alert-item {
+  background: rgba(0, 0, 0, 0.05);
+  border-left-color: #b88a2a;
+}
+
+body.light .alert-item.warning {
+  background: rgba(255, 193, 7, 0.1);
+  border-left-color: #ffc107;
+}
+
+body.light .alert-item.success {
+  background: rgba(40, 167, 69, 0.1);
+  border-left-color: #28a745;
+}
+
+body.light .alert-item.info {
+  background: rgba(23, 162, 184, 0.1);
+  border-left-color: #17a2b8;
+}
+
+body.light .alert-title {
+  color: #1a1a1a;
+}
+
+body.light .alert-desc {
+  color: #333;
+}
+
+body.light .alert-time {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+body.light .alert-dismiss {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+body.light .alert-dismiss:hover {
+  color: #000;
+}
+
+body.light .export-btn {
+  background: rgba(0, 0, 0, 0.08);
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+body.light .export-btn:hover {
+  background: rgba(0, 0, 0, 0.12);
+  color: #000;
+}
+
+body.light .modal {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+body.light .modal h3 {
+  color: #1a1a1a;
+}
+
+body.light .form-group label {
+  color: #333;
+}
+
+body.light .form-group select,
+body.light .form-group input,
+body.light .form-group textarea {
+  background: #f5f5f5;
+  color: #1a1a1a;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+body.light .form-group select:focus,
+body.light .form-group input:focus,
+body.light .form-group textarea:focus {
+  border-color: #b88a2a;
+  box-shadow: 0 0 0 2px rgba(180, 140, 40, 0.15);
+}
+
+body.light .btn-primary {
+  background: linear-gradient(90deg, #b88a2a, #7a9f2f);
+  color: #fff;
+}
+
+body.light .btn-primary:hover {
+  box-shadow: 0 4px 12px rgba(180, 140, 40, 0.2);
+}
+
+body.light .btn-secondary {
+  background: rgba(0, 0, 0, 0.08);
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+body.light .btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.12);
+  color: #000;
+}
+
+body.light .modal-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* ================================
+   NEW PAGES LIGHT MODE STYLES
+================================ */
+
+/* CUSTOMERS PAGE LIGHT MODE */
+body.light .customers-page {
+  color: #1a1a1a;
+}
+
+body.light .stat-card {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+body.light .stat-content h3 {
+  color: #666;
+}
+
+body.light .stat-value {
+  color: #1a1a1a;
+}
+
+body.light .table-container {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+body.light .customers-table th {
+  background: #f0f0f0;
+  color: #333;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.light .customers-table td {
+  color: #333;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.light .customer-name {
+  color: #1a1a1a;
+}
+
+body.light .customer-company {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+body.light .customer-avatar {
+  background: linear-gradient(90deg, #b88a2a, #7a9f2f);
+  color: #fff;
+}
+
+body.light .status.active {
+  background: rgba(40, 167, 69, 0.15);
+  color: #2d5a2d;
+}
+
+body.light .status.inactive {
+  background: rgba(108, 117, 125, 0.15);
+  color: #6c757d;
+}
+
+body.light .status.prospect {
+  background: rgba(255, 193, 7, 0.15);
+  color: #6e5600;
+}
+
+body.light .btn-sm.edit {
+  background: rgba(0, 123, 255, 0.15);
+  color: #0066cc;
+  border: 1px solid rgba(0, 123, 255, 0.3);
+}
+
+body.light .btn-sm.edit:hover {
+  background: rgba(0, 123, 255, 0.25);
+}
+
+body.light .btn-sm.view {
+  background: rgba(40, 167, 69, 0.15);
+  color: #2d8a4f;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+body.light .btn-sm.view:hover {
+  background: rgba(40, 167, 69, 0.25);
+}
+
+body.light .btn-pagination {
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+body.light .btn-pagination:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+body.light .page-info {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/* SALES ORDERS PAGE LIGHT MODE */
+body.light .orders-page {
+  color: #1a1a1a;
+}
+
+body.light .order-number {
+  color: #b88a2a;
+}
+
+body.light .status.processing {
+  background: rgba(23, 162, 184, 0.15);
+  color: #0c5460;
+}
+
+body.light .status.shipped {
+  background: rgba(0, 123, 255, 0.15);
+  color: #003d82;
+}
+
+body.light .status.delivered {
+  background: rgba(40, 167, 69, 0.15);
+  color: #2d5a2d;
+}
+
+body.light .btn-sm.status {
+  background: rgba(255, 193, 7, 0.15);
+  color: #6e5600;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+body.light .btn-sm.status:hover:not(:disabled) {
+  background: rgba(255, 193, 7, 0.25);
+}
+
+body.light .order-preview {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.light .order-preview h4 {
+  color: #1a1a1a;
+}
+
+body.light .preview-line {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+body.light .preview-line.total {
+  color: #1a1a1a;
+  border-top-color: rgba(0, 0, 0, 0.1);
+}
+
+/* PERFORMANCE PAGE LIGHT MODE */
+body.light .performance-page {
+  color: #1a1a1a;
+}
+
+body.light .metric-card {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+body.light .metric-card.primary {
+  border-color: rgba(180, 140, 40, 0.3);
+  background: linear-gradient(145deg, #ffffff, #f5f5f5);
+}
+
+body.light .metric-content h3 {
+  color: #666;
+}
+
+body.light .metric-value {
+  color: #1a1a1a;
+}
+
+body.light .metric-change.positive {
+  color: #2d8a4f;
+}
+
+body.light .metric-change.negative {
+  color: #d32f2f;
+}
+
+body.light .progress-bar {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+body.light .progress-fill {
+  background: linear-gradient(90deg, #b88a2a, #7a9f2f);
+}
+
+body.light .chart-container {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+body.light .chart-container h3 {
+  color: #1a1a1a;
+}
+
+body.light .product-name {
+  color: #1a1a1a;
+}
+
+body.light .product-bar {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+body.light .product-fill {
+  background: linear-gradient(90deg, #b88a2a, #7a9f2f);
+}
+
+body.light .legend-label {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+body.light .activity-icon.sale {
+  background: rgba(40, 167, 69, 0.15);
+}
+
+body.light .activity-icon.customer {
+  background: rgba(0, 123, 255, 0.15);
+}
+
+body.light .activity-icon.target {
+  background: rgba(220, 53, 69, 0.15);
+}
+
+body.light .activity-icon.meeting {
+  background: rgba(23, 162, 184, 0.15);
+}
+
+body.light .activity-title {
+  color: #1a1a1a;
+}
+
+body.light .activity-desc {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+body.light .activity-time {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+body.light .table-section {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+body.light .table-section h3 {
+  color: #1a1a1a;
+}
+
+body.light .performance-table th {
+  background: #f0f0f0;
+  color: #333;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.light .performance-table td {
+  color: #333;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.light .metric-current {
+  color: #1a1a1a;
+}
+
+body.light .metric-previous {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+body.light .metric-change.positive {
+  color: #2d8a4f;
+}
+
+body.light .metric-change.negative {
+  color: #d32f2f;
+}
+
+body.light .achievement-bar {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+body.light .achievement-fill {
+  background: linear-gradient(90deg, #b88a2a, #7a9f2f);
+}
+
+body.light .achievement-text {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+/* COMMON SEARCH AND FORM ELEMENTS */
+body.light .search-input {
+  background: #f0f0f0;
+  color: #1a1a1a;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+body.light .search-input::placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+body.light .search-input:focus {
+  border-color: #b88a2a;
+  box-shadow: 0 0 8px rgba(180, 140, 40, 0.2);
+}
+
+body.light .period-select {
+  background: #f0f0f0;
+  color: #1a1a1a;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+body.light .period-select:focus {
+  border-color: #b88a2a;
+  box-shadow: 0 0 8px rgba(180, 140, 40, 0.2);
+}
+
+body.light .search-icon {
+  opacity: 0.5;
+}
+
+/* ensure dashboard cards are white */
+body.light .dashboard .card {
+  background: #ffffff;
+}
+
+/* light backgrounds for other container elements */
+body.light .delivery-actions,
+body.light .report-controls {
+  background: #f0f0f0 !important;
+}
+
+/* adjust table shadows for light */
+body.light table {
+  background: #ffffff;
+}
+
+/* Filter tabs light mode */
+body.light .tab-btn {
+  background: #f0f0f0;
+  color: #555;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+body.light .tab-btn:hover {
+  background: #e0e0e0;
+  color: #333;
+  border-color: #b88a2a;
+}
+
+body.light .tab-btn.active {
+  background: linear-gradient(135deg, #b88a2a, #7a9f2f);
+  color: #000;
+  border-color: transparent;
+  box-shadow: 0 4px 15px rgba(180, 140, 40, 0.3);
+}
+
+/* Footer light-mode adaptations */
+body.light .footer {
+  background: #ffffff !important;
+  border-top: 1px solid rgba(0,0,0,0.1) !important;
+  color: #333 !important;
+  box-shadow: 0 -5px 20px rgba(0,0,0,0.05) !important;
+}
+
+body.light .footer-content {
+  color: #333 !important;
+}
+
+body.light .footer-content p {
+  color: #666 !important;
+}
+
+body.light .footer-link {
+  color: #333 !important;
+}
+
+body.light .footer-link:hover {
+  color: #000 !important;
+}
+
+
+/* Soft subtle glow overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 20% 20%, rgba(180, 140, 40, 0.08), transparent 40%),
+              radial-gradient(circle at 80% 80%, rgba(120, 180, 60, 0.06), transparent 40%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+
+/* ================================
+   UTILITY CLASSES
+================================ */
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+
+.p-1 { padding: 0.5rem; }
+.p-2 { padding: 1rem; }
+.p-3 { padding: 1.5rem; }
+.p-4 { padding: 2rem; }
+
+/* Global Page Header Typography */
+.page-header h1 {
+  background: linear-gradient(90deg, #ffffff, var(--accent-gold), #ffffff) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  animation: shimmer 5s linear infinite !important;
+}
+
+body.light .page-header h1 {
+  background: linear-gradient(90deg, #1a1a1a, #b88a2a, #1a1a1a) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  animation: shimmer 5s linear infinite !important;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Navbar Brand Animation - Sync with Page Headers */
+.navbar-brand h1 {
+  background: linear-gradient(90deg, #ffffff, var(--accent-gold), #ffffff) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  animation: shimmer 5s linear infinite !important;
+}
+
+body.light .navbar-brand h1 {
+  background: linear-gradient(90deg, #1a1a1a, #b8860b, #1a1a1a) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  animation: shimmer 5s linear infinite !important;
+}
+
+
+/* ================================
+   RESPONSIVE GRID
+================================ */
+
+.grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ================================
+   FUTURISTIC CARD COMPONENT
+================================ */
+
+.card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  border-radius: 18px;
+  padding: 1.5rem;
+
+  border: 1px solid rgba(180, 140, 40, 0.2);
+
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(180, 140, 40, 0.08);
+
+  transition: all 0.3s ease;
+}
+
+/* Hover lift effect */
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 12px 25px rgba(0, 0, 0, 0.6),
+    0 0 25px rgba(180, 140, 40, 0.15);
+}
+
+
+/* ================================
+   METRIC NUMBERS (Glow Effect)
+================================ */
+
+.metric-value {
+  font-size: 2.2rem;
+  font-weight: 700;
+
+  background: linear-gradient(90deg, #d4a937, #9acd32);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+/* ================================
+   FUTURISTIC TABLE
+================================ */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #f5f5f5;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+th {
+  background: rgba(180, 140, 40, 0.1);
+  text-align: left;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+th, td {
+  padding: 0.9rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+tbody tr {
+  transition: background 0.3s ease;
+}
+
+tbody tr:hover {
+  background: rgba(180, 140, 40, 0.08);
+}
+
+
+/* ================================
+   FUTURISTIC BUTTON
+================================ */
+
+.btn-primary {
+  background: linear-gradient(135deg, #b88a2a, #7a9f2f);
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 30px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(180, 140, 40, 0.3);
+}
+
+
+/* ================================
+   LOADING SPINNER (UPGRADED)
+================================ */
+
+.loading {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(255,255,255,0.15);
+  border-top: 3px solid #d4a937;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

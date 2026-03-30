@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "express": "^5.2.1",
+    "vue": "^3.2.13",
+    "vue-router": "^4.0.3"
+  },
+  "scripts": {
+    "start": "vite --open",
+    "dev": "vite --open"
+  },
+  "name": "yumsie-se",
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "vite": "^5.4.0"
+  }
+}
