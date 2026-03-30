@@ -14,3 +14,4 @@ This folder contains backend-style business logic extracted for mentor review.
 ## Delivery Log
 - Activity logging done (#13)
 - Discrepancy alerts done (#14)
+- Order completion check done (#15)
