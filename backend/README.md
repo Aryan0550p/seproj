@@ -17,3 +17,4 @@ This folder contains backend-style business logic extracted for mentor review.
 - Order completion check done (#15)
 - Stock auto adjust done (#16)
 - Sample distribution done (#17)
+- Stock validation done (#18)
