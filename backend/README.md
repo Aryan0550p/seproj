@@ -19,3 +19,4 @@ This folder contains backend-style business logic extracted for mentor review.
 - Sample distribution done (#17)
 - Stock validation done (#18)
 - Stock mismatch detection done (#19)
+- Pending payments done (#20)
