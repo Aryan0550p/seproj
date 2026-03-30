@@ -10,3 +10,5 @@ This folder contains backend-style business logic extracted for mentor review.
   - Stock validation and stock adjustment workflows
   - Dispatch/cancel inventory updates
   - Pending payment calculations
+
+## Delivery Log
