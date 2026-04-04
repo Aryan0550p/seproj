@@ -2,6 +2,11 @@
 
 This folder contains backend-style business logic extracted for mentor review.
 
+## Persistence
+- The backend now persists data in a SQLite database file: `backend/yumsie.db`.
+- Existing `backend/data.json` is used only as a one-time migration source if present.
+- After migration, all reads and writes go through SQLite.
+
 ## Included file
 - `store.js`: Core logic implemented during this phase:
   - Activity logging mechanism
@@ -10,13 +15,3 @@ This folder contains backend-style business logic extracted for mentor review.
   - Stock validation and stock adjustment workflows
   - Dispatch/cancel inventory updates
   - Pending payment calculations
-
-## Delivery Log
-- Activity logging done (#13)
-- Discrepancy alerts done (#14)
-- Order completion check done (#15)
-- Stock auto adjust done (#16)
-- Sample distribution done (#17)
-- Stock validation done (#18)
-- Stock mismatch detection done (#19)
-- Pending payments done (#20)
