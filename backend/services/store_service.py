@@ -2,11 +2,13 @@ import json
 import os
 import random
 import re
+import sqlite3
 from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 DATA_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data.json")
+DB_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "yumsie.db")
 MAX_ACTIVITY_LOGS = 1000
 
 SEED_PRODUCTS = [
@@ -30,9 +32,51 @@ SEED_ORDERS = [
 
 
 class StoreService:
-    def __init__(self, data_file: str = DATA_FILE) -> None:
+    def __init__(self, data_file: str = DATA_FILE, db_file: str = DB_FILE) -> None:
         self.data_file = data_file
+        self.db_file = db_file
+        self._ensure_schema()
         self._init_store()
+
+    def _get_connection(self) -> sqlite3.Connection:
+        os.makedirs(os.path.dirname(self.db_file), exist_ok=True)
+        connection = sqlite3.connect(self.db_file)
+        connection.row_factory = sqlite3.Row
+        return connection
+
+    def _ensure_schema(self) -> None:
+        with self._get_connection() as connection:
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS app_state (
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                )
+                """
+            )
+            connection.commit()
+
+    def _read_state_from_db(self) -> Optional[Dict[str, Any]]:
+        with self._get_connection() as connection:
+            row = connection.execute("SELECT value FROM app_state WHERE key = ?", ("store_state",)).fetchone()
+        if not row:
+            return None
+        return json.loads(row["value"])
+
+    def _write_state_to_db(self, state: Dict[str, Any]) -> None:
+        serialized = json.dumps(state)
+        now = self._now_iso()
+        with self._get_connection() as connection:
+            connection.execute(
+                """
+                INSERT INTO app_state (key, value, updated_at)
+                VALUES (?, ?, ?)
+                ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+                """,
+                ("store_state", serialized, now),
+            )
+            connection.commit()
 
     def _now_iso(self) -> str:
         return datetime.utcnow().isoformat() + "Z"
@@ -63,11 +107,14 @@ class StoreService:
         }
 
     def _load_state(self) -> Dict[str, Any]:
-        if not os.path.exists(self.data_file):
-            return self._seed_state()
-
-        with open(self.data_file, "r", encoding="utf-8") as f:
-            state = json.load(f)
+        state = self._read_state_from_db()
+        if state is None:
+            if os.path.exists(self.data_file):
+                with open(self.data_file, "r", encoding="utf-8") as f:
+                    state = json.load(f)
+            else:
+                state = self._seed_state()
+            self._write_state_to_db(state)
 
         defaults = self._seed_state()
         for key, default_value in defaults.items():
@@ -77,9 +124,7 @@ class StoreService:
         return state
 
     def _save_state(self, state: Dict[str, Any]) -> None:
-        os.makedirs(os.path.dirname(self.data_file), exist_ok=True)
-        with open(self.data_file, "w", encoding="utf-8") as f:
-            json.dump(state, f, indent=2)
+        self._write_state_to_db(state)
 
     def _init_store(self) -> None:
         state = self._load_state()
