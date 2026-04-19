@@ -57,33 +57,64 @@
           <h2>User Management</h2>
           <button class="close-btn" @click="isUserModalOpen = false">&times;</button>
         </div>
-        <div class="create-user-card">
-          <h3>Create New User</h3>
-          <form @submit.prevent="handleCreateUser" class="create-user-form">
-            <div class="form-group">
-              <label>Username</label>
-              <input v-model="newUser.username" type="text" required placeholder="Enter username" />
+        <div class="management-grid">
+          <div class="create-user-card">
+            <h3>Create New User</h3>
+            <form @submit.prevent="handleCreateUser" class="create-user-form">
+              <div class="form-group">
+                <label>Username</label>
+                <input v-model="newUser.username" type="text" required placeholder="Enter username" />
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input v-model="newUser.password" type="password" required placeholder="Enter password" />
+              </div>
+              <div class="form-group">
+                <label>Role</label>
+                <select v-model="newUser.role" required>
+                  <option value="" disabled>Select Role</option>
+                  <option value="salesman">Salesman</option>
+                  <option value="retailer">Retailer (Wholeseller)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input v-model="newUser.email" type="email" required placeholder="Enter email" />
+              </div>
+              <button type="submit" class="btn-primary">Create User</button>
+            </form>
+          </div>
+
+          <div class="user-list-card">
+            <div class="card-header">
+              <h3>Registered Users</h3>
+              <span class="user-count">{{ users.length }}</span>
             </div>
-            <div class="form-group">
-              <label>Password</label>
-              <input v-model="newUser.password" type="password" required placeholder="Enter password" />
+
+            <div v-if="users.length" class="user-list">
+              <article v-for="user in users" :key="user.username" class="user-row">
+                <div class="user-info">
+                  <strong>{{ user.username }}</strong>
+                  <p>{{ user.email || 'No email stored' }}</p>
+                </div>
+                <div class="user-meta">
+                  <span class="role-badge" :class="user.role">{{ user.role }}</span>
+                  <button
+                    class="btn-delete"
+                    type="button"
+                    :disabled="isProtectedUser(user)"
+                    @click="handleDeleteUser(user)"
+                  >
+                    {{ isProtectedUser(user) ? 'Protected' : 'Delete' }}
+                  </button>
+                </div>
+              </article>
             </div>
-            <div class="form-group">
-              <label>Role</label>
-              <select v-model="newUser.role" required>
-                <option value="" disabled>Select Role</option>
-                <option value="salesman">Salesman</option>
-                <option value="retailer">Retailer (Wholeseller)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Email</label>
-              <input v-model="newUser.email" type="email" required placeholder="Enter email" />
-            </div>
-            <button type="submit" class="btn-primary">Create User</button>
-          </form>
-          <p v-if="message" :class="['message', messageType]">{{ message }}</p>
+
+            <p v-else class="empty-state">No registered users found.</p>
+          </div>
         </div>
+        <p v-if="message" :class="['message', messageType]">{{ message }}</p>
       </div>
     </div>
   </div>
@@ -91,7 +122,7 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue'
-import { createUser, getAllUsers } from '../auth'
+import { createUser, deleteUser, getAllUsers, getUser } from '../auth'
 import { getOrders, getPendingPaymentStats } from '../store'
 
 export default {
@@ -104,6 +135,7 @@ export default {
     const orders = ref([])
     const users = ref([])
     const pendingPaymentStats = ref({ count: 0, totalAmount: 0, orders: [] })
+    const currentUsername = computed(() => getUser()?.username || '')
 
     const reload = async () => {
       orders.value = await getOrders()
@@ -135,7 +167,31 @@ export default {
       }
     }
 
-    return { newUser, isUserModalOpen, message, messageType, handleCreateUser, totalOrders, totalRevenue, activeUsers, pendingDeliveries, pendingPaymentStats, recentOrders }
+    const isProtectedUser = (user) => user.username === 'admin' || user.username === currentUsername.value
+
+    const handleDeleteUser = (user) => {
+      if (isProtectedUser(user)) {
+        message.value = 'This user account is protected.'
+        messageType.value = 'error'
+        setTimeout(() => { message.value = '' }, 4000)
+        return
+      }
+
+      const confirmed = window.confirm(`Delete ${user.username}? This action cannot be undone.`)
+      if (!confirmed) {
+        return
+      }
+
+      const result = deleteUser(user.username)
+      message.value = result.message
+      messageType.value = result.success ? 'success' : 'error'
+      if (result.success) {
+        users.value = getAllUsers()
+      }
+      setTimeout(() => { message.value = '' }, 4000)
+    }
+
+    return { newUser, isUserModalOpen, message, messageType, handleCreateUser, handleDeleteUser, isProtectedUser, totalOrders, totalRevenue, activeUsers, pendingDeliveries, pendingPaymentStats, recentOrders, users }
   }
 }
 </script>
@@ -253,6 +309,8 @@ export default {
 .close-btn { background: none; border: none; color: var(--text-secondary); font-size: 2rem; cursor: pointer; transition: color 0.2s; }
 .close-btn:hover { color: var(--accent-gold); }
 
+.management-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 22px; align-items: start; }
+
 .create-user-card { background: var(--bg-secondary); border-radius: 12px; padding: 24px; }
 .create-user-card h3 { margin-top: 0; margin-bottom: 16px; font-size: 1.1rem; color: var(--text-secondary); }
 .create-user-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: end; }
@@ -262,9 +320,32 @@ export default {
 .form-group input:focus, .form-group select:focus { border-color: var(--accent-gold); }
 .btn-primary { grid-column: 1 / -1; padding: 12px 24px; border-radius: 10px; border: none; font-weight: 600; font-size: 1rem; cursor: pointer; background: linear-gradient(90deg, #b48c28, #6e9f3a); color: #111; transition: transform 0.2s ease, box-shadow 0.2s ease; height: 44px; margin-top: 10px; }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(180, 140, 40, 0.3); }
+.user-list-card { background: var(--bg-secondary); border-radius: 12px; padding: 24px; border: 1px solid var(--border-subtle); }
+.card-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+.card-header h3 { margin: 0; font-size: 1.1rem; color: var(--text-secondary); }
+.user-count { min-width: 40px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: rgba(180, 140, 40, 0.15); color: var(--accent-gold); font-weight: 700; }
+.user-list { display: grid; gap: 12px; max-height: 420px; overflow: auto; padding-right: 4px; }
+.user-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 16px; border-radius: 14px; background: var(--bg-card); border: 1px solid var(--border-subtle); }
+.user-info { min-width: 0; }
+.user-info strong { display: block; font-size: 1rem; color: var(--text-primary); }
+.user-info p { margin: 4px 0 0; color: var(--text-secondary); font-size: 0.9rem; word-break: break-word; }
+.user-meta { display: flex; align-items: center; gap: 10px; }
+.role-badge { display: inline-flex; align-items: center; justify-content: center; padding: 6px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; text-transform: capitalize; }
+.role-badge.admin { background: rgba(180, 140, 40, 0.16); color: var(--accent-gold); }
+.role-badge.salesman { background: rgba(23, 162, 184, 0.16); color: var(--status-shipped-text); }
+.role-badge.retailer { background: rgba(110, 159, 58, 0.16); color: var(--status-delivered-text); }
+.btn-delete { border: 1px solid rgba(255, 107, 107, 0.35); background: rgba(255, 107, 107, 0.1); color: #ff8b8b; padding: 10px 14px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+.btn-delete:hover:not(:disabled) { background: rgba(255, 107, 107, 0.18); transform: translateY(-1px); }
+.btn-delete:disabled { opacity: 0.55; cursor: not-allowed; }
+.empty-state { margin: 0; padding: 18px 0; color: var(--text-secondary); }
 .message { margin-top: 16px; padding: 12px; border-radius: 8px; font-weight: 500; text-align: center; }
 .message.success { background: rgba(110, 159, 58, 0.2); color: #6ecf8d; border: 1px solid rgba(110, 159, 58, 0.4); }
 .message.error { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; border: 1px solid rgba(255, 107, 107, 0.4); }
+
+@media (max-width: 960px) {
+  .management-grid { grid-template-columns: 1fr; }
+  .user-management-modal { max-width: 96vw; }
+}
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }

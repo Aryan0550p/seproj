@@ -36,37 +36,66 @@ export function getUserRole() {
   return state.user?.role || null
 }
 
-export function getAllUsers() {
+function getDynamicUsers() {
   const saved = localStorage.getItem(DB_USERS_KEY)
-  let dynamicUsers = []
-  if (saved) {
-    try {
-      dynamicUsers = JSON.parse(saved)
-    } catch {
-      dynamicUsers = []
-    }
+  if (!saved) {
+    return []
   }
-  return [...USERS, ...dynamicUsers]
+
+  try {
+    return JSON.parse(saved)
+  } catch {
+    return []
+  }
+}
+
+function saveDynamicUsers(users) {
+  localStorage.setItem(DB_USERS_KEY, JSON.stringify(users))
+}
+
+export function getAllUsers() {
+  return [...USERS, ...getDynamicUsers()]
 }
 
 export function createUser({ username, password, role, email }) {
   const allUsers = getAllUsers()
-  if (allUsers.find(u => u.username === username)) {
+  const normalizedUsername = String(username || '').trim()
+
+  if (allUsers.find(u => u.username === normalizedUsername)) {
     return { success: false, message: 'Username already exists.' }
   }
-  
-  const saved = localStorage.getItem(DB_USERS_KEY)
-  let dynamicUsers = []
-  if (saved) {
-    try {
-      dynamicUsers = JSON.parse(saved)
-    } catch {
-      dynamicUsers = []
-    }
-  }
-  dynamicUsers.push({ username, password, role, email })
-  localStorage.setItem(DB_USERS_KEY, JSON.stringify(dynamicUsers))
+
+  const dynamicUsers = getDynamicUsers()
+  dynamicUsers.push({
+    username: normalizedUsername,
+    password,
+    role,
+    email: String(email || '').trim(),
+    createdAt: new Date().toISOString()
+  })
+  saveDynamicUsers(dynamicUsers)
   return { success: true, message: `${role} account created successfully!` }
+}
+
+export function deleteUser(username) {
+  if (username === 'admin') {
+    return { success: false, message: 'The built-in admin account cannot be deleted.' }
+  }
+
+  const dynamicUsers = getDynamicUsers()
+  const nextUsers = dynamicUsers.filter(user => user.username !== username)
+
+  if (nextUsers.length === dynamicUsers.length) {
+    return { success: false, message: 'User not found.' }
+  }
+
+  saveDynamicUsers(nextUsers)
+
+  if (state.user?.username === username) {
+    logout()
+  }
+
+  return { success: true, message: `${username} was deleted successfully.` }
 }
 
 export function login({ username, password }) {
@@ -94,5 +123,6 @@ export default {
   login,
   logout,
   createUser,
+  deleteUser,
   getAllUsers
 }
