@@ -5,6 +5,7 @@
       <router-view />
     </main>
     <Footer v-if="isAuthenticated" />
+    <AiChatWidget v-if="isAuthenticated" />
 
   </div>
 </template>
@@ -13,6 +14,7 @@
 import { computed } from 'vue'
 import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
+import AiChatWidget from './components/AiChatWidget.vue'
 import { isLoggedIn } from './auth'
 import { initStore } from './store'
 
@@ -20,7 +22,8 @@ export default {
   name: 'App',
   components: {
     Navbar,
-    Footer
+    Footer,
+    AiChatWidget
   },
   setup() {
     const initResult = initStore()
