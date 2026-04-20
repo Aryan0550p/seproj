@@ -1,34 +1,38 @@
 <template>
-  <div class="login-page">
-    <div class="login-card">
-      <div class="login-header">
-        <h1>Welcome back</h1>
-        <button class="theme-toggle" type="button" @click="toggleTheme">
-          {{ isDark ? '🌞' : '🌙' }}
-        </button>
+  <div class="login-container">
+    <Navbar />
+    <div class="login-page">
+      <div class="login-card">
+        <div class="login-header">
+          <h1>Welcome back</h1>
+          <button class="theme-toggle" type="button" @click="toggleTheme">
+            {{ isDark ? '🌞' : '🌙' }}
+          </button>
+        </div>
+        <p class="subtitle">Sign in with your credentials to access the dashboard.</p>
+
+        <form @submit.prevent="handleLogin">
+          <label>
+            <span>Username</span>
+            <input v-model="username" type="text" autocomplete="username" placeholder="Enter Username" required />
+          </label>
+
+          <label>
+            <span>Password</span>
+            <input v-model="password" type="password" autocomplete="current-password" placeholder="Enter Password" required />
+          </label>
+
+          <button type="submit" class="btn" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Signing in…' : 'Sign in' }}
+          </button>
+
+          <p v-if="error" class="error">{{ error }}</p>
+
+          
+        </form>
       </div>
-      <p class="subtitle">Sign in with your credentials to access the dashboard.</p>
-
-      <form @submit.prevent="handleLogin">
-        <label>
-          <span>Username</span>
-          <input v-model="username" type="text" autocomplete="username" placeholder="Enter Username" required />
-        </label>
-
-        <label>
-          <span>Password</span>
-          <input v-model="password" type="password" autocomplete="current-password" placeholder="Enter Password" required />
-        </label>
-
-        <button type="submit" class="btn" :disabled="isSubmitting">
-          {{ isSubmitting ? 'Signing in…' : 'Sign in' }}
-        </button>
-
-        <p v-if="error" class="error">{{ error }}</p>
-
-        
-      </form>
     </div>
+    <Footer />
   </div>
 </template>
 
@@ -36,9 +40,15 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { login } from '../auth'
+import Navbar from '../components/Navbar.vue'
+import Footer from '../components/Footer.vue'
 
 export default {
   name: 'Login',
+  components: {
+    Navbar,
+    Footer
+  },
   setup() {
     const router = useRouter()
     const route = useRoute()
@@ -99,27 +109,72 @@ export default {
 </script>
 
 <style scoped>
+.login-container {
+  min-height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(
+      180deg,
+      rgba(10, 8, 6, 0.72),
+      rgba(10, 8, 6, 0.72)
+    ),
+    url('../assets/food_bg.jpeg') center/cover no-repeat;
+  background-attachment: fixed;
+}
+
+.login-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 8, 6, 0.45);
+  pointer-events: none;
+  z-index: 1;
+}
+
+body.light .login-container {
+  background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.3),
+      rgba(255, 255, 255, 0.3)
+    ),
+    url('../assets/food_bg.jpeg') center/cover no-repeat;
+  background-attachment: fixed;
+}
+
+body.light .login-container::before {
+  background: rgba(255, 255, 255, 0.35);
+}
+
 .login-page {
-  min-height: calc(100vh - 200px);
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 20px 20px;
+  position: relative;
+  z-index: 2;
+}
+
+body.light .login-page::before {
+  background: rgba(255, 255, 255, 0.45);
 }
 
 .login-card {
+  margin-top: 0;
   position: relative;
   width: min(450px, 100%);
   padding: 32px 30px;
   margin-top: -8vh;
   border-radius: 20px;
-  background: linear-gradient(
-    145deg,
-    rgba(25, 30, 25, 0.95),
-    rgba(18, 22, 18, 0.98)
-  );
-  border: 1px solid rgba(170, 140, 60, 0.2);
+  background: rgba(18, 18, 18, 0.92);
+  border: 1px solid rgba(170, 140, 60, 0.3);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), 0 0 28px rgba(170, 140, 60, 0.07);
+  backdrop-filter: blur(10px);
+  z-index: 2;
 }
 
 .login-header {

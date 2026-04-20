@@ -1,20 +1,19 @@
 <template>
   <div id="app">
     <Navbar v-if="isAuthenticated" />
-    <main class="main-content">
+    <main class="main-content" :class="{ 'main-fullscreen': isLoginRoute }">
       <router-view />
     </main>
     <Footer v-if="isAuthenticated" />
-    <AiChatWidget v-if="isAuthenticated" />
 
   </div>
 </template>
 
 <script>
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
-import AiChatWidget from './components/AiChatWidget.vue'
 import { isLoggedIn } from './auth'
 import { initStore } from './store'
 
@@ -22,14 +21,15 @@ export default {
   name: 'App',
   components: {
     Navbar,
-    Footer,
-    AiChatWidget
+    Footer
   },
   setup() {
     initStore()
+    const route = useRoute()
     const isAuthenticated = computed(() => isLoggedIn())
+    const isLoginRoute = computed(() => route.name === 'Login')
 
-    return { isAuthenticated }
+    return { isAuthenticated, isLoginRoute }
   }
 }
 </script>
@@ -80,6 +80,14 @@ export default {
 /* Smooth page transitions */
 .main-content {
   animation: fadeIn 0.4s ease-in-out;
+}
+
+.main-content.main-fullscreen {
+  padding: 0;
+  max-width: none;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
 }
 
 @keyframes fadeIn {
