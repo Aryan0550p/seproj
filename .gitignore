@@ -9,3 +9,6 @@ __pycache__/
 *.sqlite3
 .DS_Store
 Thumbs.db
+.pytest_cache/
+backend/.pytest_tmp/
+backend/.test_tmp/
